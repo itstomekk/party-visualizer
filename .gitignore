@@ -1,0 +1,25 @@
+# Deny by default: ignore everything, then allowlist what belongs in the public repo.
+# A new top-level file/folder stays ignored until you add a `!` line here.
+/*
+
+!/.gitignore
+!/LICENSE
+!/README.md
+!/DEVELOPMENT.md
+!/UPDATING.md
+!/FUNCTION-REFERENCE.md
+!/package.json
+!/server.js
+!/index.html
+
+# nested dirs need `!dir/` and `!dir/**`
+!/sketches/
+!/sketches/**
+!/vendor/
+!/vendor/**
+!/scripts/
+!/scripts/**
+!/docs/
+!/docs/**
+!/.github/
+!/.github/**

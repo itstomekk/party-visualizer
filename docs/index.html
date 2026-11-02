@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Party Visualizer - camera + mic reactive visuals, offline</title>
+<meta name="description" content="A tiny offline-capable Hydra runner that turns a webcam and a microphone into live visuals for the projector.">
+<meta property="og:title" content="Party Visualizer">
+<meta property="og:description" content="Camera + mic reactive visuals for the projector. Works offline.">
+<meta property="og:image" content="img/hero.png">
+<style>
+  :root {
+    --ink: #0c0b10;
+    --paper: #f3efe4;
+    --acid: #c6ff2e;
+    --pink: #ff3d9a;
+    --mute: #8b8797;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--ink); color: var(--paper);
+    font-family: "Segoe UI", system-ui, -apple-system, Helvetica, Arial, sans-serif;
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  .mono { font-family: "Cascadia Code", "SF Mono", Consolas, Menlo, monospace; }
+
+  /* top strip */
+  .strip {
+    background: var(--acid); color: var(--ink); overflow: hidden; white-space: nowrap;
+    border-bottom: 3px solid var(--ink);
+    font-weight: 800; text-transform: uppercase; letter-spacing: .18em; font-size: 12px; padding: 7px 0;
+  }
+  .strip span { display: inline-block; padding-left: 100%; animation: roll 28s linear infinite; }
+  @keyframes roll { to { transform: translateX(-100%); } }
+  @media (prefers-reduced-motion: reduce) { .strip span { animation: none; padding-left: 24px; } }
+
+  /* hero */
+  header { padding: 56px 0 40px; position: relative; }
+  .tag {
+    display: inline-block; background: var(--pink); color: var(--ink); font-weight: 800;
+    padding: 3px 10px; transform: rotate(-2deg); text-transform: uppercase; font-size: 12px; letter-spacing: .12em;
+  }
+  h1 {
+    margin: 18px 0 14px; font-family: Impact, "Arial Narrow Bold", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 900; font-size: clamp(54px, 11vw, 132px); line-height: .88; letter-spacing: -.01em;
+    text-transform: uppercase;
+  }
+  h1 em { font-style: normal; color: var(--acid); display: block; }
+  .lead { font-size: clamp(18px, 2.2vw, 22px); max-width: 640px; color: #d8d3c6; margin: 0 0 28px; }
+  .cta { display: flex; flex-wrap: wrap; gap: 14px; }
+  .btn {
+    display: inline-block; text-decoration: none; font-weight: 800; padding: 13px 20px;
+    border: 3px solid var(--paper); text-transform: uppercase; letter-spacing: .06em; font-size: 14px;
+    box-shadow: 5px 5px 0 var(--paper); transition: transform .12s, box-shadow .12s;
+  }
+  .btn:hover { transform: translate(3px,3px); box-shadow: 2px 2px 0 var(--paper); }
+  .btn.primary { background: var(--acid); color: var(--ink); border-color: var(--acid); box-shadow: 5px 5px 0 var(--pink); }
+  .btn.primary:hover { box-shadow: 2px 2px 0 var(--pink); }
+
+  .shot {
+    margin: 44px 0 0; border: 3px solid var(--paper); background: #000; box-shadow: 12px 12px 0 var(--acid);
+  }
+  .shot .bar { background: var(--paper); color: var(--ink); font-size: 12px; padding: 5px 12px; display: flex; justify-content: space-between; font-weight: 700; }
+  .shot img { display: block; width: 100%; height: auto; }
+  .cap { color: var(--mute); font-size: 13px; margin-top: 18px; }
+
+  /* sections */
+  section { padding: 64px 0; border-top: 1px dashed #3a3745; }
+  h2 {
+    font-family: Impact, "Arial Narrow Bold", Arial, sans-serif; font-size: clamp(34px, 6vw, 56px);
+    text-transform: uppercase; margin: 0 0 30px; line-height: 1; font-weight: 900;
+  }
+  h2 small { display: block; font-family: "Cascadia Code", Consolas, monospace; font-size: 13px; color: var(--pink); letter-spacing: .2em; margin-bottom: 8px; font-weight: 600; }
+
+  .feats { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+  .feat { border: 3px solid var(--paper); padding: 22px 22px 24px; position: relative; background: #14121a; }
+  .feat .n { font-family: Impact, Arial, sans-serif; font-size: 64px; line-height: 1; color: var(--acid); }
+  .feat h3 { margin: 6px 0 8px; font-size: 21px; text-transform: uppercase; letter-spacing: .03em; }
+  .feat p { margin: 0; color: #cfcabc; }
+  .feat:nth-child(2) .n { color: var(--pink); }
+
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px; }
+  figure { margin: 0; }
+  figure .shot { margin: 0; box-shadow: 8px 8px 0 var(--pink); }
+  figure:nth-child(2) .shot { box-shadow: 8px 8px 0 var(--acid); }
+  figcaption { margin-top: 16px; color: var(--mute); font-size: 14px; }
+
+  pre {
+    margin: 0; background: #000; border: 3px solid var(--acid); color: var(--acid);
+    padding: 20px 22px; overflow-x: auto; font-size: 15px; line-height: 1.7;
+  }
+  pre .c { color: var(--mute); }
+  .steps { list-style: none; counter-reset: s; padding: 0; margin: 28px 0 0; display: grid; gap: 10px; }
+  .steps li { counter-increment: s; padding-left: 44px; position: relative; color: #d8d3c6; }
+  .steps li::before {
+    content: counter(s); position: absolute; left: 0; top: 0; width: 30px; height: 30px; background: var(--paper); color: var(--ink);
+    font-weight: 900; display: grid; place-items: center;
+  }
+  .limits { color: #cfcabc; }
+  .limits li { margin-bottom: 6px; }
+
+  footer { padding: 40px 0 70px; border-top: 3px solid var(--paper); color: var(--mute); font-size: 14px; }
+  footer strong { color: var(--paper); }
+  footer a { color: var(--acid); }
+</style>
+</head>
+<body>
+
+<div class="strip" aria-hidden="true"><span>Offline-capable &#9679; camera + mic reactive &#9679; built on Hydra &#9679; no install, no cloud, no tracking &#9679; offline-capable &#9679; camera + mic reactive &#9679; built on Hydra &#9679;</span></div>
+
+<header>
+  <div class="wrap">
+    <span class="tag mono">open source &middot; AGPL-3.0</span>
+    <h1>Party<em>Visualizer</em></h1>
+    <p class="lead">Point a webcam and a microphone at a room and get live, sound-reactive visuals for the projector. It runs from one folder, and it still works when the venue wifi doesn't.</p>
+    <div class="cta">
+      <a class="btn primary" href="app/">&#9654; Try the live demo</a>
+      <a class="btn" href="https://github.com/itstomekk/party-visualizer">View on GitHub</a>
+    </div>
+
+    <div class="shot">
+      <div class="bar mono"><span>party-visualizer / Full Silhouette Dissolve</span><span>&#9679; running</span></div>
+      <img src="img/hero.png" alt="Party Visualizer running the Full Silhouette Dissolve sketch: a stick-figure silhouette turned into green stars among glowing orbs" width="1440" height="810">
+    </div>
+    <p class="cap">Real screenshot of the app. The camera is replaced by a synthetic animated source so no real person is shown.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2><small>// what you get</small>Three good reasons</h2>
+    <div class="feats">
+      <div class="feat"><div class="n">01</div><h3>Reacts to you</h3><p>Silhouettes dissolve into stars, kaleidoscopes pulse with the bass, motion leaves rainbow trails. Voice and music drive the numbers.</p></div>
+      <div class="feat"><div class="n">02</div><h3>Works offline</h3><p>The Hydra engine is bundled and the server is ~40 lines of plain Node. Clone it, run it, no internet needed at the venue.</p></div>
+      <div class="feat"><div class="n">03</div><h3>Edit it live</h3><p>Every effect is a short, commented Hydra sketch. Change a number in the side panel, hit Ctrl+Enter, see it instantly.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><small>// more frames</small>Same app, other sketches</h2>
+    <div class="two">
+      <figure>
+        <div class="shot"><img src="img/dissolve-stars.png" alt="Edge Dissolve Stars sketch: green stars tracing a figure's edges"></div>
+        <figcaption><strong>Edge Dissolve Stars</strong>: green sparkle traces outlines and drifts away like embers.</figcaption>
+      </figure>
+      <figure>
+        <div class="shot"><img src="img/thermal-trails.png" alt="Thermal Feedback Trails sketch: glowing figure with colored motion trails"></div>
+        <figcaption><strong>Thermal Feedback Trails</strong>: fake thermal colors with long rainbow motion trails.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section id="start">
+  <div class="wrap">
+    <h2><small>// quick start</small>Three steps</h2>
+<pre class="mono"><span class="c"># 1. get it</span>
+git clone https://github.com/itstomekk/party-visualizer.git
+cd party-visualizer
+
+<span class="c"># 2. run it (Node.js, nothing to install)</span>
+node server.js
+
+<span class="c"># 3. open http://localhost:8080, press Run, allow camera + mic</span></pre>
+    <ol class="steps">
+      <li>Start with <strong>Camera Warp</strong>, then try the star sketches while you talk or clap.</li>
+      <li>Press <strong>F</strong> for fullscreen, <strong>Ctrl+H</strong> to hide the panel.</li>
+      <li>Prefer not to install anything? The <a href="app/" style="color:var(--acid)">live demo</a> is the same app served statically. It processes camera and mic only in your browser.</li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><small>// fine print</small>Honest limits</h2>
+    <ul class="limits">
+      <li>Needs a modern browser with WebGL (Chrome or Edge best; Firefox worked in testing; Safari untested).</li>
+      <li>Camera and mic permission is required for the camera/audio effects.</li>
+      <li>Rendering is on the GPU. Very old laptops will struggle, especially with the feedback sketches.</li>
+      <li>Made for a laptop plugged into a projector: no touch or phone controls.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Built on <a href="https://hydra.ojack.xyz">Hydra</a> by <a href="https://github.com/ojack">Olivia Jack</a></strong> (<a href="https://github.com/ojack/hydra-synth">hydra-synth</a>, AGPL-3.0). All the visual magic is theirs; this project is the offline runner and sketch library around it.</p>
+    <p>Licensed AGPL-3.0. <a href="https://github.com/itstomekk/party-visualizer">Source on GitHub</a> &middot; <a href="https://github.com/itstomekk/party-visualizer/blob/main/FUNCTION-REFERENCE.md">Hydra function cheat sheet</a> &middot; <a href="https://github.com/itstomekk/party-visualizer/blob/main/DEVELOPMENT.md">Development notes</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

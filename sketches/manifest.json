@@ -1,0 +1,8 @@
+[
+  { "file": "sketches/01-camera-warp.js", "name": "Camera Warp", "desc": "Basic distorted, pulsing, color-shifted camera feed" },
+  { "file": "sketches/02-voice-reactive.js", "name": "Voice Reactive", "desc": "Camera warp driven by mic input (mid/high frequencies)" },
+  { "file": "sketches/03-dissolve-stars.js", "name": "Edge Dissolve Stars", "desc": "Green star sparkle traces edges of people/objects, dissolves with feedback" },
+  { "file": "sketches/04-silhouette-stars.js", "name": "Full Silhouette Dissolve", "desc": "Whole person/shape (not just edges) turns into a starfield" },
+  { "file": "sketches/05-kaleidoscope.js", "name": "Audio Kaleidoscope", "desc": "Mirrored kaleidoscope pattern, bass drives segment count" },
+  { "file": "sketches/06-thermal-feedback.js", "name": "Thermal Feedback Trails", "desc": "Fake thermal color grading with long rainbow motion trails" }
+]

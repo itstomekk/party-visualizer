@@ -1,0 +1,24 @@
+{
+  "name": "party-visualizer",
+  "version": "1.0.0",
+  "description": "Offline-capable camera/mic-reactive visualizer built on Hydra, served by a tiny zero-dependency Node server.",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "vendor": "node -e \"require('fs').copyFileSync('node_modules/hydra-synth/dist/hydra-synth.js','vendor/hydra-synth.js')\"",
+    "sync-demo": "node scripts/sync-demo.js"
+  },
+  "keywords": ["hydra", "visualizer", "vj", "webgl", "audio-reactive", "live-coding"],
+  "author": "itstomekk",
+  "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itstomekk/party-visualizer.git"
+  },
+  "homepage": "https://github.com/itstomekk/party-visualizer",
+  "devDependencies": {
+    "hydra-synth": "1.4.0"
+  },
+  "type": "commonjs"
+}
